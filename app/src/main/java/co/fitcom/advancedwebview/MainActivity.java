@@ -1,6 +1,7 @@
 package co.fitcom.advancedwebview;
 
 import android.content.ComponentName;
+import android.content.Intent;
 import android.support.customtabs.CustomTabsClient;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -22,7 +23,7 @@ public class MainActivity extends AppCompatActivity {
     public void onTap(View view){
         AdvancedWebViewListener listener = new Listener();
         webView = new AdvancedWebView(this,listener);
-        webView.loadUrl("http://google.com");
+        webView.loadUrl("https://google.com");
     }
 
 
@@ -40,6 +41,15 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void onNavigationEvent(int event, Bundle extras) {
             if(event == 6){
+                System.out.println("Tabs closed");
+            }
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if(requestCode == AdvancedWebView.REQUEST_CODE){
+            if(resultCode == RESULT_CANCELED){
                 System.out.println("Tabs closed");
             }
         }

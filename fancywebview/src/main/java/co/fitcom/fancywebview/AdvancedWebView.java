@@ -1,5 +1,6 @@
 package co.fitcom.fancywebview;
 
+import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
@@ -12,7 +13,6 @@ import android.support.customtabs.CustomTabsClient;
 import android.support.customtabs.CustomTabsIntent;
 import android.support.customtabs.CustomTabsServiceConnection;
 import android.support.customtabs.CustomTabsSession;
-
 /**
  * Created by triniwiz on 1/18/18.
  */
@@ -27,13 +27,20 @@ public class AdvancedWebView {
     private CustomTabsIntent customTabsIntent;
     private CustomTabsIntent.Builder builder;
     private Context mContext;
+    public static final int REQUEST_CODE = 1868;
     public static final String PACKAGE_NAME = "com.android.chrome";
     public AdvancedWebView(Context context, @Nullable AdvancedWebViewListener listener) {
         mContext = context;
         setWebViewListener(listener);
-        customTabsClient = customTabsServiceConnection.getCustomTabsClient();
-        customTabsSession = customTabsClient.newSession(customTabsCallbackListener);
-        builder = new CustomTabsIntent.Builder(customTabsSession);
+        setUp();
+    }
+
+    void setUp(){
+        if(customTabsServiceConnection.getCustomTabsClient() != null) {
+            customTabsClient = customTabsServiceConnection.getCustomTabsClient();
+            customTabsSession = customTabsClient.newSession(customTabsCallbackListener);
+            builder = new CustomTabsIntent.Builder(customTabsSession);
+        }
     }
 
     public static void init(Context context,boolean warmUp) {
@@ -63,16 +70,30 @@ public class AdvancedWebView {
     }
 
     public void loadUrl(String string) {
-        customTabsIntent = builder.build();
         PackageManager pm = mContext.getPackageManager();
         try {
             ApplicationInfo info = pm.getApplicationInfo(PACKAGE_NAME, 0);
             if (info.enabled) {
-                customTabsIntent.intent.setPackage(PACKAGE_NAME);
+                setUp();
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                if(builder != null){
+                    customTabsIntent = builder.build();
+                    customTabsIntent.intent.setPackage(PACKAGE_NAME);
+                }
             }
-            customTabsIntent.launchUrl(mContext, Uri.parse(string));
+            if(customTabsIntent != null){
+                customTabsIntent.launchUrl(mContext, Uri.parse(string));
+            }else{
+                WebViewFallback fallback = new WebViewFallback();
+                fallback.openUri((Activity)mContext,Uri.parse(string));
+            }
         } catch (PackageManager.NameNotFoundException e) {
-            customTabsIntent.launchUrl(mContext, Uri.parse(string));
+            WebViewFallback fallback = new WebViewFallback();
+            fallback.openUri((Activity)mContext,Uri.parse(string));
         }
     }
 
@@ -99,7 +120,7 @@ class CustomTabsServiceConnectionCallBack extends CustomTabsServiceConnection {
     @Override
     public void onCustomTabsServiceConnected(ComponentName name, CustomTabsClient client) {
         if (warmUpView) {
-            client.warmup(0);
+            client.warmup(0L);
         }
         if (webViewListener != null) {
             webViewListener.onCustomTabsServiceConnected(name, client);
@@ -141,4 +162,5 @@ class CustomTabsCallbackListener extends CustomTabsCallback {
     public void setWebViewListener(AdvancedWebViewListener listener) {
         webViewListener = listener;
     }
+
 }
