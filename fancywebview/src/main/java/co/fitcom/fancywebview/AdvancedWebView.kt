@@ -12,6 +12,26 @@ import androidx.browser.customtabs.*
  * Created by triniwiz on 1/18/18.
  */
 
+
+object AdvancedWebViewStatics {
+    var customTabsServiceConnection: CustomTabsServiceConnectionCallBack? = null
+    var customTabsCallbackListener: CustomTabsCallbackListener? = null
+    const val PACKAGE_NAME = "com.android.chrome"
+    const val REQUEST_CODE = 1868
+
+    fun init(context: Context, warmUp: Boolean) {
+        if (customTabsServiceConnection == null) {
+            customTabsServiceConnection = CustomTabsServiceConnectionCallBack(null, warmUp)
+        }
+
+        if (customTabsCallbackListener == null) {
+            customTabsCallbackListener = CustomTabsCallbackListener(null)
+        }
+
+        CustomTabsClient.bindCustomTabsService(context, PACKAGE_NAME, customTabsServiceConnection)
+    }
+}
+
 class AdvancedWebView(private val mContext: Context, listener: AdvancedWebViewListener?) {
 
     private var webViewListener: AdvancedWebViewListener? = null
@@ -27,28 +47,28 @@ class AdvancedWebView(private val mContext: Context, listener: AdvancedWebViewLi
 
 
     private fun setUp() {
-        if (customTabsServiceConnection!!.customTabsClient != null) {
-            customTabsClient = customTabsServiceConnection!!.customTabsClient
-            session = customTabsClient!!.newSession(customTabsCallbackListener)
+        if (AdvancedWebViewStatics.customTabsServiceConnection!!.customTabsClient != null) {
+            customTabsClient = AdvancedWebViewStatics.customTabsServiceConnection!!.customTabsClient
+            session = customTabsClient!!.newSession(AdvancedWebViewStatics.customTabsCallbackListener)
             builder = CustomTabsIntent.Builder(session)
         }
     }
 
     private fun setWebViewListener(listener: AdvancedWebViewListener?) {
         webViewListener = listener
-        customTabsServiceConnection!!.setWebViewListener(listener)
-        customTabsCallbackListener!!.setWebViewListener(listener)
+        AdvancedWebViewStatics.customTabsServiceConnection!!.setWebViewListener(listener)
+        AdvancedWebViewStatics.customTabsCallbackListener!!.setWebViewListener(listener)
     }
 
     fun loadUrl(string: String) {
         val pm = mContext.packageManager
         try {
-            val info = pm.getApplicationInfo(PACKAGE_NAME, 0)
+            val info = pm.getApplicationInfo(AdvancedWebViewStatics.PACKAGE_NAME, 0)
 
             if (info.enabled) {
                 if (builder != null) {
                     customTabsIntent = builder!!.build()
-                    customTabsIntent!!.intent.setPackage(PACKAGE_NAME)
+                    customTabsIntent!!.intent.setPackage(AdvancedWebViewStatics.PACKAGE_NAME)
                 }
             }
             if (customTabsIntent != null) {
@@ -72,29 +92,10 @@ class AdvancedWebView(private val mContext: Context, listener: AdvancedWebViewLi
         if (builder != null) this.builder = builder
     }
 
-    companion object {
-        private var customTabsServiceConnection: CustomTabsServiceConnectionCallBack? = null
-        private var customTabsCallbackListener: CustomTabsCallbackListener? = null
-        private const val PACKAGE_NAME = "com.android.chrome"
-        const val REQUEST_CODE = 1868
-
-        fun init(context: Context, warmUp: Boolean) {
-            if (customTabsServiceConnection == null) {
-                customTabsServiceConnection = CustomTabsServiceConnectionCallBack(null, warmUp)
-            }
-
-            if (customTabsCallbackListener == null) {
-                customTabsCallbackListener = CustomTabsCallbackListener(null)
-            }
-
-            CustomTabsClient.bindCustomTabsService(context, PACKAGE_NAME, customTabsServiceConnection)
-        }
-    }
-
 }
 
 
-internal class CustomTabsServiceConnectionCallBack(private var webViewListener: AdvancedWebViewListener?, warmUp: Boolean) : CustomTabsServiceConnection() {
+class CustomTabsServiceConnectionCallBack(private var webViewListener: AdvancedWebViewListener?, warmUp: Boolean) : CustomTabsServiceConnection() {
     private var warmUpView = false
     var customTabsClient: CustomTabsClient? = null
         private set
@@ -125,7 +126,7 @@ internal class CustomTabsServiceConnectionCallBack(private var webViewListener: 
 }
 
 
-internal class CustomTabsCallbackListener(private var webViewListener: AdvancedWebViewListener?) : CustomTabsCallback() {
+class CustomTabsCallbackListener(private var webViewListener: AdvancedWebViewListener?) : CustomTabsCallback() {
 
     override fun onNavigationEvent(navigationEvent: Int, extras: Bundle?) {
         if (webViewListener != null) {

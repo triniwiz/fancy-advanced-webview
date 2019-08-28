@@ -13,7 +13,7 @@ import androidx.appcompat.app.AppCompatActivity
 
 
 object WebViewActivityConstants {
-    fun EXTRAL_URL() = "extra.url"
+    val EXTRAL_URL get() = "extra.url"
 }
 
 class WebViewActivity : AppCompatActivity() {
@@ -22,7 +22,7 @@ class WebViewActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_webview)
-        val url = intent.getStringExtra(WebViewActivityConstants.EXTRAL_URL())
+        val url = intent.getStringExtra(WebViewActivityConstants.EXTRAL_URL)
         val webView = findViewById<WebView>(R.id.webview)
         val client = WebViewClient()
         webView.webViewClient = client

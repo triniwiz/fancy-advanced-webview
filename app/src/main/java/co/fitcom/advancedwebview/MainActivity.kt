@@ -9,6 +9,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.browser.customtabs.CustomTabsClient
 import co.fitcom.fancywebview.AdvancedWebView
 import co.fitcom.fancywebview.AdvancedWebViewListener
+import co.fitcom.fancywebview.AdvancedWebViewStatics
 
 
 class MainActivity : AppCompatActivity() {
@@ -17,7 +18,7 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        AdvancedWebView.init(this, false)
+        AdvancedWebViewStatics.init(this, false)
     }
 
     fun onTap(view: View) {
@@ -54,7 +55,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == AdvancedWebView.REQUEST_CODE) {
+        if (requestCode == AdvancedWebViewStatics.REQUEST_CODE) {
             if (resultCode == Activity.RESULT_CANCELED) {
                 println("Tabs closed")
             }
