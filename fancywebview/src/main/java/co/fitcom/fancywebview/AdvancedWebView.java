@@ -7,43 +7,47 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
-import android.support.customtabs.CustomTabsCallback;
-import android.support.customtabs.CustomTabsClient;
-import android.support.customtabs.CustomTabsIntent;
-import android.support.customtabs.CustomTabsServiceConnection;
-import android.support.customtabs.CustomTabsSession;
+
+import androidx.annotation.Nullable;
+import androidx.browser.customtabs.CustomTabsCallback;
+import androidx.browser.customtabs.CustomTabsClient;
+import androidx.browser.customtabs.CustomTabsIntent;
+import androidx.browser.customtabs.CustomTabsServiceConnection;
+import androidx.browser.customtabs.CustomTabsSession;
+
 /**
  * Created by triniwiz on 1/18/18.
  */
 
 public class AdvancedWebView {
     private static CustomTabsServiceConnectionCallBack customTabsServiceConnection;
+    private static CustomTabsCallbackListener customTabsCallbackListener;
+    private static final String PACKAGE_NAME = "com.android.chrome";
+    public static final int REQUEST_CODE = 1868;
+
     private AdvancedWebViewListener webViewListener;
     private CustomTabsClient customTabsClient;
-    private static CustomTabsCallbackListener customTabsCallbackListener;
     private boolean warmUpView = false;
     private CustomTabsSession customTabsSession;
     private CustomTabsIntent customTabsIntent;
     private CustomTabsIntent.Builder builder;
     private Context mContext;
-    public static final int REQUEST_CODE = 1868;
-    public static final String PACKAGE_NAME = "com.android.chrome";
+
     public AdvancedWebView(Context context, @Nullable AdvancedWebViewListener listener) {
         mContext = context;
         setWebViewListener(listener);
         setUp();
     }
 
-    void setUp(){
-        if(customTabsServiceConnection.getCustomTabsClient() != null) {
+    void setUp() {
+        if (customTabsServiceConnection.getCustomTabsClient() != null) {
             customTabsClient = customTabsServiceConnection.getCustomTabsClient();
             customTabsSession = customTabsClient.newSession(customTabsCallbackListener);
             builder = new CustomTabsIntent.Builder(customTabsSession);
         }
     }
 
-    public static void init(Context context,boolean warmUp) {
+    public static void init(Context context, boolean warmUp) {
         if (customTabsServiceConnection == null) {
             customTabsServiceConnection = new CustomTabsServiceConnectionCallBack(null, warmUp);
         }
@@ -80,28 +84,28 @@ public class AdvancedWebView {
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
-                if(builder != null){
+                if (builder != null) {
                     customTabsIntent = builder.build();
                     customTabsIntent.intent.setPackage(PACKAGE_NAME);
                 }
             }
-            if(customTabsIntent != null){
+            if (customTabsIntent != null) {
                 customTabsIntent.launchUrl(mContext, Uri.parse(string));
-            }else{
+            } else {
                 WebViewFallback fallback = new WebViewFallback();
-                fallback.openUri((Activity)mContext,Uri.parse(string));
+                fallback.openUri((Activity) mContext, Uri.parse(string));
             }
         } catch (PackageManager.NameNotFoundException e) {
             WebViewFallback fallback = new WebViewFallback();
-            fallback.openUri((Activity)mContext,Uri.parse(string));
+            fallback.openUri((Activity) mContext, Uri.parse(string));
         }
     }
 
-    public CustomTabsSession getSession(){
+    public CustomTabsSession getSession() {
         return customTabsSession;
     }
 
-    public CustomTabsIntent.Builder getBuilder(){
+    public CustomTabsIntent.Builder getBuilder() {
         return builder;
     }
 
@@ -112,6 +116,7 @@ class CustomTabsServiceConnectionCallBack extends CustomTabsServiceConnection {
     private AdvancedWebViewListener webViewListener;
     private boolean warmUpView = false;
     private CustomTabsClient mClient;
+
     public CustomTabsServiceConnectionCallBack(@Nullable AdvancedWebViewListener listener, boolean warmUp) {
         webViewListener = listener;
         warmUpView = warmUp;
@@ -139,7 +144,7 @@ class CustomTabsServiceConnectionCallBack extends CustomTabsServiceConnection {
         webViewListener = listener;
     }
 
-    public CustomTabsClient getCustomTabsClient(){
+    public CustomTabsClient getCustomTabsClient() {
         return mClient;
     }
 }
